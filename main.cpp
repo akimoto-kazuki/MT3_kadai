@@ -80,6 +80,7 @@ Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2)
 }
 
 
+
 Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate)
 {
 	Matrix4x4 result;
@@ -96,6 +97,7 @@ Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Ve
 
 	return result;
 }
+
 
 static const int kRowHeight = 20;
 static const int kColumnWidth = 60;
@@ -121,6 +123,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// キー入力結果を受け取る箱
 	char keys[256] = {0};
 	char preKeys[256] = {0};
+
 
 	Vector3 scale{ 1.2f,0.79f,-2.1f };
 	Vector3 rotate{ 0.4f,1.43f,-0.8f };
@@ -148,9 +151,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 		/// ↓描画処理ここから
 		///
-
+    
 		MatrixScreenPrintf(0, 0, worldMatrix, "worldMatrix");
-
+    
 		///
 		/// ↑描画処理ここまで
 		///
