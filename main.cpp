@@ -2,6 +2,33 @@
 
 const char kWindowTitle[] = "LC1C_02_アキモト_カズキ";
 
+struct Vector3
+{
+	float x;
+	float y;
+	float z;
+};
+
+struct Matrix4x4
+{
+	float m;
+};
+
+Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip)
+{
+
+}
+
+Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip)
+{
+
+}
+
+Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth)
+{
+
+}
+
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
