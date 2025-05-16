@@ -203,6 +203,7 @@ Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Ve
 
 	return result;
 }
+
 //透視投影行列
 Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip)
 {
@@ -212,9 +213,10 @@ Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip
 	result.m[1][0] = 0.0f; result.m[1][1] = 1/tan(fovY / 2); result.m[1][2] = 0.0f; result.m[1][3] = 0.0f;
 	result.m[2][0] = 0.0f; result.m[2][1] = 0.0f; result.m[2][2] = farClip /(farClip - nearClip); result.m[2][3] = 1.0f;
 	result.m[3][0] = 0.0f; result.m[3][1] = 0.0f; result.m[3][2] = -nearClip * farClip / (farClip - nearClip); result.m[3][3] = 0.0f;
-
+  
 	return result;
 }
+
 
 //正射影行列
 Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip)
@@ -229,6 +231,7 @@ Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float botto
 	return result;
 }
 
+
 //ビューポート変換行列
 Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth)
 {
@@ -241,8 +244,8 @@ Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, f
 
 	return result;
 }
-
 Vector3 Cross(const Vector3& v1, const Vector3& v2)
+
 {
 	Vector3 reslut;
 
@@ -252,6 +255,7 @@ Vector3 Cross(const Vector3& v1, const Vector3& v2)
 
 	return reslut;
 }
+
 
 static const int kRowHeight = 20;
 static const int kColumnWidth = 60;
@@ -276,7 +280,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Vector3 v1{ 1.2f,-3.9f,2.5f };
 	Vector3 v2{ 2.8f,0.4f,-1.3f };
 	Vector3 cross = Cross(v1, v2);
-
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
