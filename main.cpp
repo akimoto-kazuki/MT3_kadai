@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <imgui.h>
 
+
 const char kWindowTitle[] = "LC1C_02_アキモト_カズキ";
 
 struct Vector3
@@ -19,11 +20,13 @@ struct Matrix4x4
 	float m[4][4];
 };
 
+
 struct Sphere
 {
 	Vector3 center;
 	float radius;
 };
+
 
 Vector3 rotate_{ 0.0f,0.0f,0.0f };
 
@@ -215,11 +218,12 @@ Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip
 {
 	Matrix4x4 result;
 
-	result.m[0][0] = 1 / aspectRatio * 1 / tan(fovY / 2); result.m[0][1] = 0.0f; result.m[0][2] = 0.0f; result.m[0][3] = 0.0f;
-	result.m[1][0] = 0.0f; result.m[1][1] = 1 / tan(fovY / 2); result.m[1][2] = 0.0f; result.m[1][3] = 0.0f;
-	result.m[2][0] = 0.0f; result.m[2][1] = 0.0f; result.m[2][2] = farClip / (farClip - nearClip); result.m[2][3] = 1.0f;
-	result.m[3][0] = 0.0f; result.m[3][1] = 0.0f; result.m[3][2] = -nearClip * farClip / (farClip - nearClip); result.m[3][3] = 0.0f;
 
+	result.m[0][0] = 1/aspectRatio * 1/tan(fovY / 2); result.m[0][1] = 0.0f; result.m[0][2] = 0.0f; result.m[0][3] = 0.0f;
+	result.m[1][0] = 0.0f; result.m[1][1] = 1/tan(fovY / 2); result.m[1][2] = 0.0f; result.m[1][3] = 0.0f;
+	result.m[2][0] = 0.0f; result.m[2][1] = 0.0f; result.m[2][2] = farClip /(farClip - nearClip); result.m[2][3] = 1.0f;
+	result.m[3][0] = 0.0f; result.m[3][1] = 0.0f; result.m[3][2] = -nearClip * farClip / (farClip - nearClip); result.m[3][3] = 0.0f;
+  
 	return result;
 }
 
@@ -228,11 +232,11 @@ Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float botto
 {
 	Matrix4x4 result;
 
-	result.m[0][0] = 2 / (right - left); result.m[0][1] = 0.0f; result.m[0][2] = 0.0f; result.m[0][3] = 0.0f;
-	result.m[1][0] = 0.0f; result.m[1][1] = 2 / (top - bottom); result.m[1][2] = 0.0f; result.m[1][3] = 0.0f;
-	result.m[2][0] = 0.0f; result.m[2][1] = 0.0f; result.m[2][2] = 1 / (farClip - nearClip); result.m[2][3] = 0.0f;
-	result.m[3][0] = (left + right) / (left - right); result.m[3][1] = (top + bottom) / (bottom - top); result.m[3][2] = nearClip / (nearClip - farClip); result.m[3][3] = 1.0f;
 
+	result.m[0][0] = 2/(right - left); result.m[0][1] = 0.0f; result.m[0][2] = 0.0f; result.m[0][3] = 0.0f;
+	result.m[1][0] = 0.0f; result.m[1][1] = 2/(top-bottom); result.m[1][2] = 0.0f; result.m[1][3] = 0.0f;
+	result.m[2][0] = 0.0f; result.m[2][1] = 0.0f; result.m[2][2] = 1/(farClip - nearClip); result.m[2][3] = 0.0f;
+	result.m[3][0] = (left + right)/(left - right); result.m[3][1] = (top + bottom)/(bottom - top); result.m[3][2] = nearClip/(nearClip-farClip); result.m[3][3] = 1.0f;
 	return result;
 }
 
@@ -242,13 +246,13 @@ Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, f
 	Matrix4x4 result;
 
 	result.m[0][0] = width / 2; result.m[0][1] = 0.0f; result.m[0][2] = 0.0f; result.m[0][3] = 0.0f;
-	result.m[1][0] = 0.0f; result.m[1][1] = -height / 2; result.m[1][2] = 0.0f; result.m[1][3] = 0.0f;
+
+	result.m[1][0] = 0.0f; result.m[1][1] = -height/2; result.m[1][2] = 0.0f; result.m[1][3] = 0.0f;
 	result.m[2][0] = 0.0f; result.m[2][1] = 0.0f; result.m[2][2] = maxDepth - minDepth; result.m[2][3] = 0.0f;
-	result.m[3][0] = left + width / 2; result.m[3][1] = top + height / 2; result.m[3][2] = minDepth; result.m[3][3] = 1.0f;
+	result.m[3][0] = left + width/2; result.m[3][1] = top + height/2; result.m[3][2] = minDepth; result.m[3][3] = 1.0f;
 
 	return result;
 }
-
 Vector3 Cross(const Vector3& v1, const Vector3& v2)
 {
 	Vector3 reslut;
@@ -260,6 +264,8 @@ Vector3 Cross(const Vector3& v1, const Vector3& v2)
 	return reslut;
 }
 
+
+
 static const int kRowHeight = 20;
 static const int kColumnWidth = 60;
 
@@ -270,8 +276,6 @@ void VectorScreenPrintf(int x, int y, const Vector3& vector, const char* label)
 	Novice::ScreenPrintf(x + kColumnWidth * 2, y, "%.02f", vector.z);
 	Novice::ScreenPrintf(x + kColumnWidth * 3, y, "%s", label);
 }
-
-
 
 void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix)
 {
@@ -337,8 +341,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Novice::Initialize(kWindowTitle, 1280, 720);
 
 	// キー入力結果を受け取る箱
-	char keys[256] = {0};
-	char preKeys[256] = {0};
+	char keys[256] = { 0 };
+	char preKeys[256] = { 0 };
+
+	Vector3 v1{ 1.2f,-3.9f,2.5f };
+	Vector3 v2{ 2.8f,0.4f,-1.3f };
+	Vector3 cross = Cross(v1, v2);
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -356,6 +364,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 		/// ↓更新処理ここから
 		///
+
 
 		Matrix4x4 cameraMatrix = MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, cameraRotate, cameraTranslate);
 
