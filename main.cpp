@@ -1,5 +1,6 @@
 #include <Novice.h>
 #include <cstdint>
+#define _USE_MATH_DEFINES
 #include <cmath>
 
 const char kWindowTitle[] = "LC1C_02_アキモト_カズキ";
@@ -31,7 +32,13 @@ void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMa
 	for (uint32_t xIndex = 0; xIndex < kSubdivision; ++xIndex)
 	{
 		// 上の情報を使ってワールド座標系上の始点を終点を求める
+		
+
+
 		// スクリーン座標系まで変換をかける
+		
+
+
 		// 変換した座標を使って表示。色の薄い灰色(0xAAAAAAFF)、原点は黒で良いが、何でも良い
 		Novice::DrawLine();
 	}
@@ -45,8 +52,9 @@ void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMa
 
 void DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color)
 {
-	const uint32_t kSubdivision = 10;
-	const float kLonEvery = 
+	const uint32_t kSubdivision = 10;						// 分割数
+	const float kLonEvery = float(2*M_PI) / kSubdivision;	// 経度分割１つの角度
+	const float kLatEvery = float(M_PI) / kSubdivision;		// 緯度分割１つの角度
 }
 
 // Windowsアプリでのエントリーポイント(main関数)
