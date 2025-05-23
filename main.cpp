@@ -1,6 +1,53 @@
 #include <Novice.h>
+#include <cstdint>
+#include <cmath>
 
 const char kWindowTitle[] = "LC1C_02_アキモト_カズキ";
+
+struct Vector3
+{
+	float x;
+	float y;
+	float z;
+};
+
+struct Matrix4x4
+{
+	float m[4][4];
+};
+
+struct Sphere
+{
+	Vector3 center;
+	float radius;
+};
+
+void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix)
+{
+	const float kGridHalfWidth = 2.0f;										// Gridの半分の幅
+	const uint32_t kSubdivision = 10;										// 分割数
+	const float kGridEvery = (kGridHalfWidth * 2.0f) / float(kSubdivision); // 1つ分の長さ
+	// 奥から手前への線を順々に引いていく
+	for (uint32_t xIndex = 0; xIndex < kSubdivision; ++xIndex)
+	{
+		// 上の情報を使ってワールド座標系上の始点を終点を求める
+		// スクリーン座標系まで変換をかける
+		// 変換した座標を使って表示。色の薄い灰色(0xAAAAAAFF)、原点は黒で良いが、何でも良い
+		Novice::DrawLine();
+	}
+	// 左から右も同じように順々に引いていく
+	for (uint32_t zIndex = 0; zIndex < kSubdivision; ++zIndex)
+	{
+		// 奥から手前が左右に変わるだけ
+	}
+
+}
+
+void DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color)
+{
+	const uint32_t kSubdivision = 10;
+	const float kLonEvery = 
+}
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
