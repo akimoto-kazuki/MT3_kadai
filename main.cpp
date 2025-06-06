@@ -27,6 +27,12 @@ struct Sphere
 	float radius;
 };
 
+struct Segment
+{
+	Vector3 x;
+	Vector3 y;
+};
+
 
 Vector3 rotate_{ 0.0f,0.0f,0.0f };
 
@@ -264,7 +270,15 @@ Vector3 Cross(const Vector3& v1, const Vector3& v2)
 	return reslut;
 }
 
+Vector3 Project(const Vector3& v1, const Vector3& v2)
+{
 
+}
+
+Vector3 ClosestPoint(const Vector3& point, const Segment& segment)
+{
+
+}
 
 static const int kRowHeight = 20;
 static const int kColumnWidth = 60;
@@ -354,8 +368,6 @@ void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMa
 
 }
 
-
-
 void DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color)
 {
 	const uint32_t kSubdivision = 10;						// 分割数
@@ -410,6 +422,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Vector3 v2{ 2.8f,0.4f,-1.3f };
 	Vector3 cross = Cross(v1, v2);
 
+	Segment segment{ {-2.0f,-1.0f,0.0f},{3.0f,2.0f,2.0f} };
+
+	Vector3 point{ -1.5f,0.6f,0.6f };
+
+	
+
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -422,6 +440,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Vector3 cameraTranslate{ 0.0f,1.9f,-6.49f };
 
 		Vector3 cameraRotate{ 0.26f,0.0f,0.0f };
+
+		Vector3 project = Project(Subtract)
 
 		Sphere sphere;
 		sphere.center = { 0.0f,0.0f,0.0f };
@@ -442,6 +462,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Matrix4x4 viewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
 
 		Matrix4x4 viewportMatrix = MakeViewportMatrix(0, 0, 1280.0f, 720.0f, 0.0f, 1.0f);
+
+		Sphere pointSphere{ point,0.01f };
+
+		Sphere closestPointSphere{/*closestPoint*/ };
 
 		/*Vector3 screenVertices[3];*/
 
