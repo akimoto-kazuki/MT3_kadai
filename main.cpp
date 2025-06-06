@@ -29,16 +29,42 @@ struct Sphere
 
 struct Segment
 {
-	Vector3 x;
-	Vector3 y;
+	Vector3 origin;
+	Vector3 diff;
 };
 
+float Dot(const Vector3& v1, const Vector3& v2)
+{
+	float result;
+	result = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+	return result;
+}
 
 Vector3 rotate_{ 0.0f,0.0f,0.0f };
 
 Vector3 translate_{ 0.0f,0.0f,0.0f };
 
 Vector3 kLocalVertices[3]{ {0.0f,1.0f,0.0f},{-1.0f,0.0f,0.0f},{1.0f,0.0f,0.0f} };
+
+// 加算
+Vector3 Add(const Vector3& v1, const Vector3& v2)
+{
+	Vector3 result;
+	result.x = v1.x + v2.x;
+	result.y = v1.y + v2.y;
+	result.z = v1.z + v2.z;
+	return result;
+}
+
+// 減算
+Vector3 Subtract(const Vector3& v1, const Vector3& v2)
+{
+	Vector3 result;
+	result.x = v1.x - v2.x;
+	result.y = v1.y - v2.y;
+	result.z = v1.z - v2.z;
+	return result;
+}
 
 Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2)
 {
@@ -272,11 +298,31 @@ Vector3 Cross(const Vector3& v1, const Vector3& v2)
 
 Vector3 Project(const Vector3& v1, const Vector3& v2)
 {
+	
+	Vector3 pro;
+	pro.x = (Dot(v1, v2) / Dot(v2, v2)) * v2.x;
+	pro.y = (Dot(v1, v2) / Dot(v2, v2)) * v2.y;
+	pro.z = (Dot(v1, v2) / Dot(v2, v2)) * v2.z;
+
+	return pro;
 
 }
 
 Vector3 ClosestPoint(const Vector3& point, const Segment& segment)
 {
+	Vector3 a;
+	float t;
+	Vector3 tb;
+	Vector3 cp;
+
+	a = Subtract(point, segment.origin);
+	t = Dot(a, segment.diff) / Dot(segment.diff, segment.diff);
+	tb.x = t * segment.diff.x;
+	tb.y = t * segment.diff.y;
+	tb.z = t * segment.diff.z;
+	cp = Add(segment.origin,tb);
+
+	return cp;
 
 }
 
@@ -441,12 +487,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		Vector3 cameraRotate{ 0.26f,0.0f,0.0f };
 
-		Vector3 project = Project(Subtract)
+		Vector3 project = Project(Subtract(point, segment.origin), segment.diff);
+
+
+		Vector3 closestPoint = ClosestPoint(point, segment);
 
 		Sphere sphere;
 		sphere.center = { 0.0f,0.0f,0.0f };
 		sphere.radius = 1;
-		int cloer = BLACK;
+		//int cloer = BLACK;
 
 		///
 		/// ↓更新処理ここから
@@ -465,7 +514,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		Sphere pointSphere{ point,0.01f };
 
-		Sphere closestPointSphere{/*closestPoint*/ };
+		Sphere closestPointSphere{closestPoint,0.01f };
+
+		Vector3 start = Transform(Transform(segment.origin, viewProjectionMatrix), viewportMatrix);
+		Vector3 end = Transform(Transform(Add(segment.origin,segment.diff), viewProjectionMatrix), viewportMatrix);
 
 		/*Vector3 screenVertices[3];*/
 
@@ -475,6 +527,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::DragFloat3("CameraRotate", &cameraRotate.x, 0.01f);
 		ImGui::DragFloat3("SphereCenter", &sphere.center.x, 0.01f);
 		ImGui::DragFloat("SphereRadius", &sphere.radius, 0.01f);
+		ImGui::InputFloat3("Project", &project.x, "%.3f", ImGuiInputTextFlags_ReadOnly);
 
 		ImGui::End();
 
@@ -488,7 +541,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		DrawGrid(viewProjectionMatrix, viewportMatrix);
 
-		DrawSphere(sphere, viewProjectionMatrix, viewportMatrix, cloer);
+		//DrawSphere(sphere, viewProjectionMatrix, viewportMatrix, cloer);
+		DrawSphere(pointSphere, viewProjectionMatrix, viewportMatrix, RED);
+		DrawSphere(closestPointSphere, viewProjectionMatrix, viewportMatrix, BLACK);
+		Novice::DrawLine(int(start.x), int(start.y), int(end.x), int(end.y), WHITE);
+
 
 		///
 		/// ↑描画処理ここまで
