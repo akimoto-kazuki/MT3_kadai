@@ -584,10 +584,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		Vector3 closestPoint = ClosestPoint(point, segment);
 
-		
-
-		
-
 		///
 		/// ↓更新処理ここから
 		///
