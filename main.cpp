@@ -517,16 +517,15 @@ void DrawPlane(const Plane& plane, const Matrix4x4& viewProjectionMatrix, const 
 	Novice::DrawLine(int(points[3].x), int(points[3].y), int(points[1].x), int(points[1].y), color);
 }
 
-bool IsCollision(const Sphere& s1, const Plane& plane)
+bool IsCollision(const Segment& segment, const Plane& plane)
 {
-	Vector3 q = { 0.0f,s1.center.y - plane.distance,0.0f };
-	float d = Dot(plane.normal, q);
-	float distanse = Dot(plane.normal,s1.center) - d;
-	if (distanse <= 0)
+	float dot = Dot(plane.normal, segment.diff);
+	if (dot == 0.0f)
 	{
-		distanse *= -1;
+		return false;
 	}
-	if (distanse <= s1.radius )
+	float t = (plane.distance - Dot(segment.origin, plane.normal)) / dot;
+	if (t <= 1 && t >= 0)
 	{
 		return true;
 	}
@@ -581,7 +580,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		Vector3 project = Project(Subtract(point, segment.origin), segment.diff);
 
-
 		Vector3 closestPoint = ClosestPoint(point, segment);
 
 		///
@@ -606,8 +604,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Vector3 start = Transform(Transform(segment.origin, viewProjectionMatrix), viewportMatrix);
 		Vector3 end = Transform(Transform(Add(segment.origin,segment.diff), viewProjectionMatrix), viewportMatrix);
 
-		IsCollision(sphere1, plane);
-		bool IsHit = IsCollision(sphere1, plane);
+		IsCollision(segment, plane);
+		bool IsHit = IsCollision(segment, plane);
 		if (IsHit)
 		{
 			collar = RED;
@@ -621,11 +619,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		ImGui::Begin("Window");
 
-		ImGui::DragFloat3("SphereCenter 1", &sphere1.center.x, 0.01f);
-		ImGui::DragFloat("SphereRadius 1", &sphere1.radius, 0.01f);
 		ImGui::DragFloat3("Plane.Normal", &plane.normal.x, 0.01f);
 		plane.normal = Normalize(plane.normal);
 		ImGui::DragFloat("Plane.Distance", &plane.distance, 0.01f);
+		ImGui::DragFloat3("Segment.diff", &segment.diff.x, 0.01f);
+		ImGui::DragFloat3("Segment.origin", &segment.origin.x, 0.01f);
 		ImGui::InputFloat3("Project", &project.x, "%.3f", ImGuiInputTextFlags_ReadOnly);
 
 		ImGui::End();
@@ -640,7 +638,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		DrawGrid(viewProjectionMatrix, viewportMatrix);
 
-		DrawSphere(sphere1, viewProjectionMatrix, viewportMatrix, collar);
+		Novice::DrawLine(int(start.x), int(start.y), int(end.x), int(end.y), collar);
 		
 		DrawPlane(plane, viewProjectionMatrix, viewportMatrix, WHITE);
 
