@@ -531,14 +531,46 @@ void DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjectionMatri
 
 bool IsCollision(const Segment& segment, const Triangle& triangle)
 {
-	Vector3 origin = { 0.0f,0.0f,0.0f };
-
+	
 	Vector3 v01 = Subtract(triangle.vertices[1], triangle.vertices[0]);
 	Vector3 v12 = Subtract(triangle.vertices[2], triangle.vertices[1]);
-	Vector3 v23 = Subtract(triangle.vertices[3], triangle.vertices[2]);
-	Vector3 p = Add(origin,)
-	Vector3 cross01 = Cross(v01,)
-	if ()
+	Vector3 v20 = Subtract(triangle.vertices[0], triangle.vertices[2]);
+
+	Vector3 cross = Cross(v01, v12);
+
+	Vector3 normalize = Normalize(cross);
+
+	float d = Dot(triangle.vertices[0], normalize);
+
+	float nomDiff = Dot(segment.diff, normalize);
+
+	if (nomDiff == 0.0f)
+	{
+		return false;
+	}
+
+	float t = (d - Dot(segment.origin, normalize)) / nomDiff;
+
+	if (0 <= t && t <= 1)
+	{
+		return false;
+	}
+
+	Vector3 tb = MultiplyVector3(t, segment.diff);
+
+	Vector3 p = Add(segment.origin, tb);
+	
+	Vector3 v0p = Subtract(p, triangle.vertices[0]);
+	Vector3 v1p = Subtract(p, triangle.vertices[1]);
+	Vector3 v2p = Subtract(p, triangle.vertices[2]);
+
+	Vector3 cross01 = Cross(v01, v1p);
+	Vector3 cross12 = Cross(v12, v2p);
+	Vector3 cross20 = Cross(v20, v0p);
+
+	if (Dot(cross01, normalize) <= 0.0f &&
+		Dot(cross12, normalize) <= 0.0f &&
+		Dot(cross20, normalize) <= 0.0f)
 	{
 		return true;
 	}
