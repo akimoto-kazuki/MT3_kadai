@@ -551,7 +551,12 @@ bool IsCollision(const Segment& segment, const Triangle& triangle)
 
 	float t = (d - Dot(segment.origin, normalize)) / nomDiff;
 
-	if (0 <= t && t <= 1)
+	if (0 > t)
+	{
+		return false;
+	}
+
+	if (1 < t)
 	{
 		return false;
 	}
@@ -568,9 +573,9 @@ bool IsCollision(const Segment& segment, const Triangle& triangle)
 	Vector3 cross12 = Cross(v12, v2p);
 	Vector3 cross20 = Cross(v20, v0p);
 
-	if (Dot(cross01, normalize) <= 0.0f &&
-		Dot(cross12, normalize) <= 0.0f &&
-		Dot(cross20, normalize) <= 0.0f)
+	if (Dot(cross01, normalize) >= 0.0f &&
+		Dot(cross12, normalize) >= 0.0f &&
+		Dot(cross20, normalize) >= 0.0f)
 	{
 		return true;
 	}
