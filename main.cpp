@@ -619,6 +619,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	plane.normal = { 0.0f,1.0f,0.0f };
 	plane.distance = 1;
 
+	Vector3 cameraTranslate{ 0.0f,2.9f,-10.49f };
+
+	Vector3 cameraRotate{ 0.26f,0.0f,0.0f };
+
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -627,10 +631,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// キー入力を受け取る
 		memcpy(preKeys, keys, 256);
 		Novice::GetHitKeyStateAll(keys);
-
-		Vector3 cameraTranslate{ 0.0f,2.9f,-10.49f };
-
-		Vector3 cameraRotate{ 0.26f,0.0f,0.0f };
 
 		Vector3 project = Project(Subtract(point, segment.origin), segment.diff);
 
@@ -676,6 +676,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::DragFloat3("triangle.v2", &triangle.vertices[2].x, 0.01f);
 		ImGui::DragFloat3("Segment.diff", &segment.diff.x, 0.01f);
 		ImGui::DragFloat3("Segment.origin", &segment.origin.x, 0.01f);
+		ImGui::DragFloat3("cameraTranslate", &cameraTranslate.x, 0.01f);
+		ImGui::DragFloat3("cameraRotate", &cameraRotate.x, 0.01f);
 
 		ImGui::End();
 
