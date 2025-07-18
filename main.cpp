@@ -4,6 +4,7 @@
 #include <cmath>
 #include <assert.h>
 #include <imgui.h>
+#include <algorithm>
 
 
 const char kWindowTitle[] = "LC1C_02_アキモト_カズキ";
@@ -594,13 +595,15 @@ void DrawAABB(const AABB& aabb, const Matrix4x4& viewProjectionMatrix, const Mat
 
 }
 
-bool IsCollision(const AABB& aabb1, const AABB& aabb2)
+bool IsCollision(const AABB& aabb1, const Sphere& sphere)
 {
-	if (
-		(aabb1.min.x <= aabb2.max.x && aabb1.max.x >= aabb2.min.x) && 
-		(aabb1.min.y <= aabb2.max.y && aabb1.max.y >= aabb2.min.y) &&
-		(aabb1.min.z <= aabb2.max.z && aabb1.max.z >= aabb2.min.z)
-		)
+	Vector3 closestPoint{
+		std::clamp(sphere.center.x,aabb1.min.x,aabb1.max.x),
+		std::clamp(sphere.center.y,aabb1.min.y,aabb1.max.y),
+		std::clamp(sphere.center.z,aabb1.min.z,aabb1.max.z)
+	};
+	float distance = Length(Add(closestPoint,sphere.center));
+	if (distance <= sphere.radius)
 	{
 		return true;
 	}
@@ -695,8 +698,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Vector3 start = Transform(Transform(segment.origin, viewProjectionMatrix), viewportMatrix);
 		Vector3 end = Transform(Transform(Add(segment.origin,segment.diff), viewProjectionMatrix), viewportMatrix);
 
-		IsCollision(aabb1,aabb2);
-		bool IsHit = IsCollision(aabb1,aabb2);
+		IsCollision(aabb1,sphere1);
+		bool IsHit = IsCollision(aabb1,sphere1);
 		if (IsHit)
 		{
 			collar = RED;
@@ -710,8 +713,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		ImGui::DragFloat3("aabb1.min", &aabb1.min.x, 0.01f);
 		ImGui::DragFloat3("aabb1.max", &aabb1.max.x, 0.01f);
-		ImGui::DragFloat3("aabb2.min", &aabb2.min.x, 0.01f);
-		ImGui::DragFloat3("aabb2.max", &aabb2.max.x, 0.01f);
+		ImGui::DragFloat3("sphere1.center", &sphere1.center.x, 0.01f);
+		ImGui::DragFloat("sphere1.radius", &sphere1.radius, 0.01f);
 
 		// カメラ
 		ImGui::DragFloat3("cameraTranslate", &cameraTranslate.x, 0.01f);
@@ -729,7 +732,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		DrawGrid(viewProjectionMatrix, viewportMatrix);
 		DrawAABB(aabb1, viewProjectionMatrix, viewportMatrix, collar);
-		DrawAABB(aabb2, viewProjectionMatrix, viewportMatrix, WHITE);
+		DrawSphere(sphere1, viewProjectionMatrix, viewportMatrix, WHITE);
 
 		///
 		/// ↑描画処理ここまで
