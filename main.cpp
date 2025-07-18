@@ -43,6 +43,12 @@ struct Triangle
 	Vector3 vertices[3]; // 頂点
 };
 
+struct AABB
+{
+	Vector3 min;
+	Vector3 max;
+};
+
 float Dot(const Vector3& v1, const Vector3& v2)
 {
 	float result;
@@ -529,57 +535,76 @@ void DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjectionMatri
 
 }
 
-bool IsCollision(const Segment& segment, const Triangle& triangle)
+void DrawAABB(const AABB& aabb, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color)
 {
-	
-	Vector3 v01 = Subtract(triangle.vertices[1], triangle.vertices[0]);
-	Vector3 v12 = Subtract(triangle.vertices[2], triangle.vertices[1]);
-	Vector3 v20 = Subtract(triangle.vertices[0], triangle.vertices[2]);
+	Vector3 aabb0; // minの位置
+	aabb0 = { aabb.min.x,aabb.min.y,aabb.min.z };
+	Vector3 screenaabb0;
+	screenaabb0 = Transform(Transform(aabb0, viewProjectionMatrix), viewportMatrix);
 
-	Vector3 cross = Cross(v01, v12);
+	Vector3 aabb1; // minの上
+	aabb1 = { aabb.min.x,aabb.max.y,aabb.min.z };
+	Vector3 screenaabb1;
+	screenaabb1 = Transform(Transform(aabb1, viewProjectionMatrix), viewportMatrix);
 
-	Vector3 normalize = Normalize(cross);
+	Vector3 aabb2; // minの右
+	aabb2 = { aabb.max.x,aabb.min.y,aabb.min.z };
+	Vector3 screenaabb2;
+	screenaabb2 = Transform(Transform(aabb2, viewProjectionMatrix), viewportMatrix);
 
-	float d = Dot(triangle.vertices[0], normalize);
+	Vector3 aabb3; // minの右上
+	aabb3 = { aabb.max.x,aabb.max.y,aabb.min.z };
+	Vector3 screenaabb3;
+	screenaabb3 = Transform(Transform(aabb3, viewProjectionMatrix), viewportMatrix);
 
-	float nomDiff = Dot(segment.diff, normalize);
+	Vector3 aabb4; // maxの左下
+	aabb4 = { aabb.min.x,aabb.min.y,aabb.max.z };
+	Vector3 screenaabb4;
+	screenaabb4 = Transform(Transform(aabb4, viewProjectionMatrix), viewportMatrix);
 
-	if (nomDiff == 0.0f)
-	{
-		return false;
-	}
+	Vector3 aabb5; // maxの左
+	aabb5 = { aabb.min.x,aabb.max.y,aabb.max.z };
+	Vector3 screenaabb5;
+	screenaabb5 = Transform(Transform(aabb5, viewProjectionMatrix), viewportMatrix);
 
-	float t = (d - Dot(segment.origin, normalize)) / nomDiff;
+	Vector3 aabb6; // maxの下
+	aabb6 = { aabb.max.x,aabb.min.y,aabb.max.z };
+	Vector3 screenaabb6;
+	screenaabb6 = Transform(Transform(aabb6, viewProjectionMatrix), viewportMatrix);
 
-	if (0 > t)
-	{
-		return false;
-	}
+	Vector3 aabb7; // maxの位置
+	aabb7 = { aabb.max.x,aabb.max.y,aabb.max.z };
+	Vector3 screenaabb7;
+	screenaabb7 = Transform(Transform(aabb7, viewProjectionMatrix), viewportMatrix);
+	// min組
+	Novice::DrawLine(int(screenaabb0.x), int(screenaabb0.y), int(screenaabb1.x), int(screenaabb1.y), color);
+	Novice::DrawLine(int(screenaabb0.x), int(screenaabb0.y), int(screenaabb2.x), int(screenaabb2.y), color);
+	Novice::DrawLine(int(screenaabb2.x), int(screenaabb2.y), int(screenaabb3.x), int(screenaabb3.y), color);
+	Novice::DrawLine(int(screenaabb1.x), int(screenaabb1.y), int(screenaabb3.x), int(screenaabb3.y), color);
+	// min と maxをつなぐ線
+	Novice::DrawLine(int(screenaabb0.x), int(screenaabb0.y), int(screenaabb4.x), int(screenaabb4.y), color);
+	Novice::DrawLine(int(screenaabb1.x), int(screenaabb1.y), int(screenaabb5.x), int(screenaabb5.y), color);
+	Novice::DrawLine(int(screenaabb2.x), int(screenaabb2.y), int(screenaabb6.x), int(screenaabb6.y), color);
+	Novice::DrawLine(int(screenaabb3.x), int(screenaabb3.y), int(screenaabb7.x), int(screenaabb7.y), color);
+	// max組
+	Novice::DrawLine(int(screenaabb4.x), int(screenaabb4.y), int(screenaabb5.x), int(screenaabb5.y), color);
+	Novice::DrawLine(int(screenaabb4.x), int(screenaabb4.y), int(screenaabb6.x), int(screenaabb6.y), color);
+	Novice::DrawLine(int(screenaabb6.x), int(screenaabb6.y), int(screenaabb7.x), int(screenaabb7.y), color);
+	Novice::DrawLine(int(screenaabb5.x), int(screenaabb5.y), int(screenaabb7.x), int(screenaabb7.y), color);
 
-	if (1 < t)
-	{
-		return false;
-	}
+}
 
-	Vector3 tb = MultiplyVector3(t, segment.diff);
-
-	Vector3 p = Add(segment.origin, tb);
-	
-	Vector3 v0p = Subtract(p, triangle.vertices[0]);
-	Vector3 v1p = Subtract(p, triangle.vertices[1]);
-	Vector3 v2p = Subtract(p, triangle.vertices[2]);
-
-	Vector3 cross01 = Cross(v01, v1p);
-	Vector3 cross12 = Cross(v12, v2p);
-	Vector3 cross20 = Cross(v20, v0p);
-
-	if (Dot(cross01, normalize) >= 0.0f &&
-		Dot(cross12, normalize) >= 0.0f &&
-		Dot(cross20, normalize) >= 0.0f)
+bool IsCollision(const AABB& aabb1, const AABB& aabb2)
+{
+	if (
+		(aabb1.min.x <= aabb2.max.x && aabb1.max.x >= aabb2.min.x) && 
+		(aabb1.min.y <= aabb2.max.y && aabb1.max.y >= aabb2.min.y) &&
+		(aabb1.min.z <= aabb2.max.z && aabb1.max.z >= aabb2.min.z)
+		)
 	{
 		return true;
 	}
-	else 
+	else
 	{
 		return false;
 	}
@@ -623,6 +648,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Vector3 cameraRotate{ 0.26f,0.0f,0.0f };
 
+	AABB aabb1
+	{
+		.min{-0.5f, -0.5f, -0.5f},
+		.max{ 0.0f,  0.0f,  0.0f},
+	};
+
+	AABB aabb2
+	{
+		.min{ 0.2f,  0.2f,  0.2f},
+		.max{ 1.0f,  1.0f,  1.0f},
+	};
+
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -658,8 +695,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Vector3 start = Transform(Transform(segment.origin, viewProjectionMatrix), viewportMatrix);
 		Vector3 end = Transform(Transform(Add(segment.origin,segment.diff), viewProjectionMatrix), viewportMatrix);
 
-		IsCollision(segment, triangle);
-		bool IsHit = IsCollision(segment, triangle);
+		IsCollision(aabb1,aabb2);
+		bool IsHit = IsCollision(aabb1,aabb2);
 		if (IsHit)
 		{
 			collar = RED;
@@ -671,11 +708,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		ImGui::Begin("Window");
 
-		ImGui::DragFloat3("triangle.v0", &triangle.vertices[0].x, 0.01f);
-		ImGui::DragFloat3("triangle.v1", &triangle.vertices[1].x, 0.01f);
-		ImGui::DragFloat3("triangle.v2", &triangle.vertices[2].x, 0.01f);
-		ImGui::DragFloat3("Segment.diff", &segment.diff.x, 0.01f);
-		ImGui::DragFloat3("Segment.origin", &segment.origin.x, 0.01f);
+		ImGui::DragFloat3("aabb1.min", &aabb1.min.x, 0.01f);
+		ImGui::DragFloat3("aabb1.max", &aabb1.max.x, 0.01f);
+		ImGui::DragFloat3("aabb2.min", &aabb2.min.x, 0.01f);
+		ImGui::DragFloat3("aabb2.max", &aabb2.max.x, 0.01f);
+
+		// カメラ
 		ImGui::DragFloat3("cameraTranslate", &cameraTranslate.x, 0.01f);
 		ImGui::DragFloat3("cameraRotate", &cameraRotate.x, 0.01f);
 
@@ -690,10 +728,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 
 		DrawGrid(viewProjectionMatrix, viewportMatrix);
-
-		Novice::DrawLine(int(start.x), int(start.y), int(end.x), int(end.y), collar);
-
-		DrawTriangle(triangle, viewProjectionMatrix, viewportMatrix, WHITE);
+		DrawAABB(aabb1, viewProjectionMatrix, viewportMatrix, collar);
+		DrawAABB(aabb2, viewProjectionMatrix, viewportMatrix, WHITE);
 
 		///
 		/// ↑描画処理ここまで
