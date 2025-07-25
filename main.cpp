@@ -595,22 +595,33 @@ void DrawAABB(const AABB& aabb, const Matrix4x4& viewProjectionMatrix, const Mat
 
 }
 
-bool IsCollision(const AABB& aabb1, const Sphere& sphere)
+bool IsCollision(const AABB& aabb1, const Segment& segment)
 {
-	Vector3 closestPoint{
-		std::clamp(sphere.center.x,aabb1.min.x,aabb1.max.x),
-		std::clamp(sphere.center.y,aabb1.min.y,aabb1.max.y),
-		std::clamp(sphere.center.z,aabb1.min.z,aabb1.max.z)
-	};
-	float distance = Length(Add(closestPoint,sphere.center));
-	if (distance <= sphere.radius)
+	float txmin = (aabb1.min.x - segment.origin.x) / segment.diff.x;
+	float txmax = (aabb1.max.x - segment.origin.x) / segment.diff.x;
+
+	float tymin = (aabb1.min.y - segment.origin.y) / segment.diff.y;
+	float tymax = (aabb1.max.y - segment.origin.y) / segment.diff.y;
+
+	float tzmin = (aabb1.min.z - segment.origin.z) / segment.diff.z;
+	float tzmax = (aabb1.max.z - segment.origin.z) / segment.diff.z;
+
+	float tNearX = min(txmin, txmax); float tNearY = min(tymin, tymax); float tNearZ = min(tzmin, tzmax);
+	float tFarX = max(txmin, txmax); float tFarY = max(txmin, txmax); float tFarZ = max(tzmin, tzmax);
+
+	float tmin = max(max(tNearX, tNearY), tNearZ);
+
+	float tmax = min(min(tFarX, tFarY), tFarZ);
+	if (tmin <= tmax)
 	{
-		return true;
+		if (tmax >= 0 && tmin <= 1 )
+		{
+			return true;
+		}
 	}
-	else
-	{
-		return false;
-	}
+	
+	return false;
+	
 }
 
 
@@ -628,7 +639,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Vector3 v2{ 2.8f,0.4f,-1.3f };
 	Vector3 cross = Cross(v1, v2);
 
-	Segment segment{ {-2.0f,-1.0f,0.0f},{3.0f,2.0f,2.0f} };
+	Segment segment{
+		.origin{-0.7f,0.3f,0.0f},
+		.diff{2.0f,-0.5f,0.0f}
+	};
 
 	Vector3 point{ -1.5f,0.6f,0.6f };
 
@@ -654,13 +668,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	AABB aabb1
 	{
 		.min{-0.5f, -0.5f, -0.5f},
-		.max{ 0.0f,  0.0f,  0.0f},
-	};
-
-	AABB aabb2
-	{
-		.min{ 0.2f,  0.2f,  0.2f},
-		.max{ 1.0f,  1.0f,  1.0f},
+		.max{ 0.5f,  0.5f,  0.5f},
 	};
 
 	// ウィンドウの×ボタンが押されるまでループ
@@ -698,8 +706,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Vector3 start = Transform(Transform(segment.origin, viewProjectionMatrix), viewportMatrix);
 		Vector3 end = Transform(Transform(Add(segment.origin,segment.diff), viewProjectionMatrix), viewportMatrix);
 
-		IsCollision(aabb1,sphere1);
-		bool IsHit = IsCollision(aabb1,sphere1);
+		IsCollision(aabb1,segment);
+		bool IsHit = IsCollision(aabb1,segment);
 		if (IsHit)
 		{
 			collar = RED;
@@ -713,8 +721,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		ImGui::DragFloat3("aabb1.min", &aabb1.min.x, 0.01f);
 		ImGui::DragFloat3("aabb1.max", &aabb1.max.x, 0.01f);
-		ImGui::DragFloat3("sphere1.center", &sphere1.center.x, 0.01f);
-		ImGui::DragFloat("sphere1.radius", &sphere1.radius, 0.01f);
+		ImGui::DragFloat3("segment.origin", &segment.origin.x, 0.01f);
+		ImGui::DragFloat("segment.diff", &segment.diff.x, 0.01f);
 
 		// カメラ
 		ImGui::DragFloat3("cameraTranslate", &cameraTranslate.x, 0.01f);
@@ -732,7 +740,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		DrawGrid(viewProjectionMatrix, viewportMatrix);
 		DrawAABB(aabb1, viewProjectionMatrix, viewportMatrix, collar);
-		DrawSphere(sphere1, viewProjectionMatrix, viewportMatrix, WHITE);
+		Novice::DrawLine(int(start.x), int(start.y), int(end.x), int(end.y), WHITE);
 
 		///
 		/// ↑描画処理ここまで
