@@ -374,6 +374,20 @@ Vector3 Perpendicular(const Vector3& vector)
 	return { 0.0f,-vector.z,vector.y };
 }
 
+Vector3 Lerp(const Vector3& v1, const Vector3& v2, float t)
+{
+	return Add(MultiplyVector3(t, v1), MultiplyVector3((1.0f - t), v2));
+}
+
+Vector3 Bezier(const Vector3& p0, const Vector3& p1, const Vector3& p2, float t)
+{
+	Vector3 p0p1 = Lerp(p0, p1, t);
+	Vector3 p1p2 = Lerp(p1, p2, t);
+	Vector3 p = Lerp(p0p1, p1p2, t);
+
+	return p;
+}
+
 static const int kRowHeight = 20;
 static const int kColumnWidth = 60;
 
@@ -595,6 +609,26 @@ void DrawAABB(const AABB& aabb, const Matrix4x4& viewProjectionMatrix, const Mat
 
 }
 
+void DrawBezier(const Vector3& controlPoints0, const Vector3& controlPoints1, const Vector3& controlPoints2, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color)
+{
+	for (int index = 0; index < 32; index++)
+	{
+		float t = float(index) / 32.0f;
+		float nextT = float(index + 1) / 32.0f;
+		Vector3 bezierPoint = Bezier(controlPoints0, controlPoints1, controlPoints2, t);
+		Vector3 bezierPointNext = Bezier(controlPoints0, controlPoints1, controlPoints2, nextT);
+		
+		Vector3 bezierPointScreen = Transform(Transform(bezierPoint, viewProjectionMatrix), viewportMatrix);
+		Vector3 bezierPointNextScreen = Transform(Transform(bezierPointNext, viewProjectionMatrix), viewportMatrix);
+
+		Novice::DrawLine(
+			int(bezierPointScreen.x), int(bezierPointScreen.y),
+			int(bezierPointNextScreen.x), int(bezierPointNextScreen.y), color
+		);
+	}
+	
+}
+
 bool IsCollision(const AABB& aabb1, const Segment& segment)
 {
 	float txmin = (aabb1.min.x - segment.origin.x) / segment.diff.x;
@@ -671,6 +705,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		.max{ 0.5f,  0.5f,  0.5f},
 	};
 
+	Vector3 controlPoints[3] = {
+		{-0.8f,0.58f,1.0f},
+		{1.76f,1.0f,-0.3f},
+		{0.94f,-0.7f,2.3f},
+	};
+
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -701,10 +741,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		Sphere pointSphere{ point,0.01f };
 
-		Sphere closestPointSphere{closestPoint,0.01f };
+		Sphere controlPointsSphere0{ controlPoints[0],0.01f};
+		Sphere controlPointsSphere1{ controlPoints[1],0.01f};
+		Sphere controlPointsSphere2{ controlPoints[2],0.01f};
 
 		Vector3 start = Transform(Transform(segment.origin, viewProjectionMatrix), viewportMatrix);
 		Vector3 end = Transform(Transform(Add(segment.origin,segment.diff), viewProjectionMatrix), viewportMatrix);
+
+		
 
 		IsCollision(aabb1,segment);
 		bool IsHit = IsCollision(aabb1,segment);
@@ -719,10 +763,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		ImGui::Begin("Window");
 
-		ImGui::DragFloat3("aabb1.min", &aabb1.min.x, 0.01f);
-		ImGui::DragFloat3("aabb1.max", &aabb1.max.x, 0.01f);
-		ImGui::DragFloat3("segment.origin", &segment.origin.x, 0.01f);
-		ImGui::DragFloat("segment.diff", &segment.diff.x, 0.01f);
+		ImGui::DragFloat3("controlPoints[0].x", &controlPoints[0].x, 0.01f);
+		ImGui::DragFloat3("controlPoints[1].x", &controlPoints[1].x, 0.01f);
+		ImGui::DragFloat3("controlPoints[2].x", &controlPoints[2].x, 0.01f);
 
 		// カメラ
 		ImGui::DragFloat3("cameraTranslate", &cameraTranslate.x, 0.01f);
@@ -739,8 +782,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 
 		DrawGrid(viewProjectionMatrix, viewportMatrix);
-		DrawAABB(aabb1, viewProjectionMatrix, viewportMatrix, collar);
-		Novice::DrawLine(int(start.x), int(start.y), int(end.x), int(end.y), WHITE);
+		DrawSphere(controlPointsSphere0, viewProjectionMatrix, viewportMatrix, BLACK);
+		DrawSphere(controlPointsSphere1, viewProjectionMatrix, viewportMatrix, BLACK);
+		DrawSphere(controlPointsSphere2, viewProjectionMatrix, viewportMatrix, BLACK);
+		DrawBezier(controlPoints[0], controlPoints[1], controlPoints[2], viewProjectionMatrix, viewportMatrix, BLUE);
 
 		///
 		/// ↑描画処理ここまで
