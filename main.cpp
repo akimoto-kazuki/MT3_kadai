@@ -71,6 +71,18 @@ Vector3 Add(const Vector3& v1, const Vector3& v2)
 	result.z = v1.z + v2.z;
 	return result;
 }
+
+Matrix4x4 Add4x4(const Matrix4x4& m1, const Matrix4x4& m2)
+{
+	Matrix4x4 result;
+	result.m[0][0] = m1.m[0][0] + m2.m[0][0]; result.m[0][1] = m1.m[0][1] + m2.m[0][1]; result.m[0][2] = m1.m[0][2] + m2.m[0][2]; result.m[0][3] = m1.m[0][3] + m2.m[0][3];
+	result.m[1][0] = m1.m[1][0] + m2.m[1][0]; result.m[1][1] = m1.m[1][1] + m2.m[1][1]; result.m[1][2] = m1.m[1][2] + m2.m[1][2]; result.m[1][3] = m1.m[1][3] + m2.m[1][3];
+	result.m[2][0] = m1.m[2][0] + m2.m[2][0]; result.m[2][1] = m1.m[2][1] + m2.m[2][1]; result.m[2][2] = m1.m[2][2] + m2.m[2][2]; result.m[2][3] = m1.m[2][3] + m2.m[2][3];
+	result.m[3][0] = m1.m[3][0] + m2.m[3][0]; result.m[3][1] = m1.m[3][1] + m2.m[3][1]; result.m[3][2] = m1.m[3][2] + m2.m[3][2]; result.m[3][3] = m1.m[3][3] + m2.m[3][3];
+
+	return result;
+}
+
 // 減算
 Vector3 Subtract(const Vector3& v1, const Vector3& v2)
 {
@@ -78,6 +90,17 @@ Vector3 Subtract(const Vector3& v1, const Vector3& v2)
 	result.x = v1.x - v2.x;
 	result.y = v1.y - v2.y;
 	result.z = v1.z - v2.z;
+	return result;
+}
+
+Matrix4x4 Subtract4x4(const Matrix4x4& m1, const Matrix4x4& m2)
+{
+	Matrix4x4 result;
+	result.m[0][0] = m1.m[0][0] - m2.m[0][0]; result.m[0][1] = m1.m[0][1] - m2.m[0][1]; result.m[0][2] = m1.m[0][2] - m2.m[0][2]; result.m[0][3] = m1.m[0][3] - m2.m[0][3];
+	result.m[1][0] = m1.m[1][0] - m2.m[1][0]; result.m[1][1] = m1.m[1][1] - m2.m[1][1]; result.m[1][2] = m1.m[1][2] - m2.m[1][2]; result.m[1][3] = m1.m[1][3] - m2.m[1][3];
+	result.m[2][0] = m1.m[2][0] - m2.m[2][0]; result.m[2][1] = m1.m[2][1] - m2.m[2][1]; result.m[2][2] = m1.m[2][2] - m2.m[2][2]; result.m[2][3] = m1.m[2][3] - m2.m[2][3];
+	result.m[3][0] = m1.m[3][0] - m2.m[3][0]; result.m[3][1] = m1.m[3][1] - m2.m[3][1]; result.m[3][2] = m1.m[3][2] - m2.m[3][2]; result.m[3][3] = m1.m[3][3] - m2.m[3][3];
+
 	return result;
 }
 
@@ -388,6 +411,47 @@ Vector3 Bezier(const Vector3& p0, const Vector3& p1, const Vector3& p2, float t)
 	return p;
 }
 
+// 演算子オーバーロード
+Vector3 operator+(const Vector3& v1, const Vector3& v2)
+{
+	return Add(v1, v2);
+}
+
+Vector3 operator-(const Vector3& v1, const Vector3& v2)
+{
+	return Subtract(v1, v2);
+}
+
+Vector3 operator*(float s, const Vector3& v)
+{
+	return MultiplyVector3(s, v);
+}
+
+Vector3 operator*(const Vector3& v,float s)
+{
+	return s * v;
+}
+
+Vector3 operator/(const Vector3& v, float s)
+{
+	return MultiplyVector3(1.0f / s, v);
+}
+
+Matrix4x4 operator+ (const Matrix4x4& m1, const Matrix4x4& m2)
+{
+	return Add4x4(m1, m2);
+}
+
+Matrix4x4 operator- (const Matrix4x4& m1, const Matrix4x4& m2)
+{
+	return Subtract4x4(m1, m2);
+}
+
+Matrix4x4 operator* (const Matrix4x4& m1, const Matrix4x4& m2)
+{
+	return Multiply(m1, m2);
+}
+
 static const int kRowHeight = 20;
 static const int kColumnWidth = 60;
 
@@ -669,7 +733,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	char keys[256] = { 0 };
 	char preKeys[256] = { 0 };
 
-	Vector3 v1{ 1.2f,-3.9f,2.5f };
+	//描画
+	/*Vector3 v1{ 1.2f,-3.9f,2.5f };
 	Vector3 v2{ 2.8f,0.4f,-1.3f };
 	Vector3 cross = Cross(v1, v2);
 
@@ -728,7 +793,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{1.0f,1.0f,1.0f},
 		{1.0f,1.0f,1.0f},
 		{1.0f,1.0f,1.0f},
-	};
+	};*/
+
+	Vector3 a{ 0.2f,1.0f,0.0f };
+	Vector3 b{ 2.4f,3.1f,1.2f };
+	Vector3 c = a + b;
+	Vector3 d = a - b;
+	Vector3 e = a * 2.4f;
+	Vector3 rotate{ 0.4f,1.43f,-0.8f };
+	Matrix4x4 rotateXMatrix = MakeRotateXMatrix(rotate.x);
+	Matrix4x4 rotateYMatrix = MakeRotateYMatrix(rotate.y);
+	Matrix4x4 rotateZMatrix = MakeRotateZMatrix(rotate.z);
+	Matrix4x4 rotateMatrix = rotateXMatrix * rotateYMatrix * rotateZMatrix;
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -739,15 +815,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		memcpy(preKeys, keys, 256);
 		Novice::GetHitKeyStateAll(keys);
 
-		Vector3 project = Project(Subtract(point, segment.origin), segment.diff);
-
-		Vector3 closestPoint = ClosestPoint(point, segment);
+		// 描画
+		/*Vector3 project = Project(Subtract(point, segment.origin), segment.diff);
+		Vector3 closestPoint = ClosestPoint(point, segment);*/
 
 		///
 		/// ↓更新処理ここから
 		///
 
-
+		// 描画処理
+		/*
 		Matrix4x4 cameraMatrix = MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, cameraRotate, cameraTranslate);
 
 		Matrix4x4 viewMatrix = Inverse(cameraMatrix);
@@ -801,21 +878,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Vector3 worldElbowCenter = Transform(Transform(elbowCenter.center, viewProjectionMatrix), viewportMatrix);
 		Vector3 worldHandCenter = Transform(Transform(handCenter.center, viewProjectionMatrix), viewportMatrix);
 
+		*/
+
+
+
 		ImGui::Begin("Window");
 
-		ImGui::DragFloat3("translates[0]", &translates[0].x, 0.01f);
-		ImGui::DragFloat3("rotates[0].x", &rotates[0].x, 0.01f);
-		ImGui::DragFloat3("scales[0].x", &scales[0].x, 0.01f);
-		ImGui::DragFloat3("translates[1]", &translates[1].x, 0.01f);
-		ImGui::DragFloat3("rotates[1].x", &rotates[1].x, 0.01f);
-		ImGui::DragFloat3("scales[1].x", &scales[1].x, 0.01f);
-		ImGui::DragFloat3("translates[2]", &translates[2].x, 0.01f);
-		ImGui::DragFloat3("rotates[2].x", &rotates[2].x, 0.01f);
-		ImGui::DragFloat3("scales[2].x", &scales[2].x, 0.01f);
-
 		// カメラ
-		ImGui::DragFloat3("cameraTranslate", &cameraTranslate.x, 0.01f);
-		ImGui::DragFloat3("cameraRotate", &cameraRotate.x, 0.01f);
+		//ImGui::DragFloat3("cameraTranslate", &cameraTranslate.x, 0.01f);
+		//ImGui::DragFloat3("cameraRotate", &cameraRotate.x, 0.01f);
+
+		ImGui::Text("c:%f,%f,%f", c.x, c.y, c.z);
+		ImGui::Text("d:%f,%f,%f", d.x, d.y, d.z);
+		ImGui::Text("e:%f,%f,%f", e.x, e.y, e.z);
+		ImGui::Text("matrix:\n%f,%f,%f,%f\n%f,%f,%f,%f\n%f,%f,%f.%f\n%f,%f,%f,%f\n",
+			rotateMatrix.m[0][0], rotateMatrix.m[0][1], rotateMatrix.m[0][2], rotateMatrix.m[0][3],
+			rotateMatrix.m[1][0], rotateMatrix.m[1][1], rotateMatrix.m[1][2], rotateMatrix.m[1][3],
+			rotateMatrix.m[2][0], rotateMatrix.m[2][1], rotateMatrix.m[2][2], rotateMatrix.m[2][3],
+			rotateMatrix.m[3][0], rotateMatrix.m[3][1], rotateMatrix.m[3][2], rotateMatrix.m[3][3]
+		);
 
 		ImGui::End();
 
@@ -827,6 +908,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓描画処理ここから
 		///
 
+		//描画
+		/*
 		DrawGrid(viewProjectionMatrix, viewportMatrix);
 
 		//
@@ -836,6 +919,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		
 		Novice::DrawLine(int(worldShoulderCenter.x), int(worldShoulderCenter.y), int(worldElbowCenter.x), int(worldElbowCenter.y), WHITE);
 		Novice::DrawLine(int(worldElbowCenter.x), int(worldElbowCenter.y), int(worldHandCenter.x), int(worldHandCenter.y), WHITE);
+
+		*/
+
 
 		///
 		/// ↑描画処理ここまで
