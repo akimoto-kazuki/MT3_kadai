@@ -689,8 +689,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	triangle.vertices[1] = { 0.0f,1.0f,0.0f };
 	triangle.vertices[2] = { 1.0f,0.0f,0.0f };
 	
-	int collar = WHITE;
-	
 	Plane plane;
 	plane.normal = { 0.0f,1.0f,0.0f };
 	plane.distance = 1;
@@ -709,6 +707,27 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{-0.8f,0.58f,1.0f},
 		{1.76f,1.0f,-0.3f},
 		{0.94f,-0.7f,2.3f},
+	};
+
+	Vector3 translates[3] =
+	{
+		{0.2f,1.0f,0.0f},
+		{0.4f,0.0f,0.0f},
+		{0.3f,0.0f,0.0f},
+	};
+
+	Vector3 rotates[3] =
+	{
+		{0.0f,0.0f,-6.8f},
+		{0.0f,0.0f,-1.4f},
+		{0.0f,0.0f,0.0f},
+	};
+
+	Vector3 scales[3] =
+	{
+		{1.0f,1.0f,1.0f},
+		{1.0f,1.0f,1.0f},
+		{1.0f,1.0f,1.0f},
 	};
 
 	// ウィンドウの×ボタンが押されるまでループ
@@ -748,24 +767,51 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Vector3 start = Transform(Transform(segment.origin, viewProjectionMatrix), viewportMatrix);
 		Vector3 end = Transform(Transform(Add(segment.origin,segment.diff), viewProjectionMatrix), viewportMatrix);
 
-		
+		Matrix4x4 localShoulder = MakeAffineMatrix(scales[0], rotates[0], translates[0]);
 
-		IsCollision(aabb1,segment);
-		bool IsHit = IsCollision(aabb1,segment);
-		if (IsHit)
+		Matrix4x4 localElbow = MakeAffineMatrix(scales[1], rotates[1], translates[1]);
+
+		Matrix4x4 localHand = MakeAffineMatrix(scales[2], rotates[2], translates[2]);
+
+		Matrix4x4 worldShoulder = localShoulder;
+
+		Matrix4x4 worldElbow = Multiply(localElbow, worldShoulder);
+
+		Matrix4x4 worldHand = Multiply(localHand, worldElbow);
+
+		Sphere shoulderCenter =
 		{
-			collar = RED;
-		}
-		else
+			{worldShoulder.m[3][0],worldShoulder.m[3][1],worldShoulder.m[3][2]},
+			0.1f,
+		};
+
+		Sphere elbowCenter =
 		{
-			collar = WHITE;
-		}
+			{worldElbow.m[3][0],worldElbow.m[3][1],worldElbow.m[3][2]},
+			0.1f,
+		};
+
+		Sphere handCenter =
+		{
+			{worldHand.m[3][0],worldHand.m[3][1],worldHand.m[3][2]},
+			0.1f,
+		};
+
+		Vector3 worldShoulderCenter= Transform(Transform(shoulderCenter.center, viewProjectionMatrix), viewportMatrix);
+		Vector3 worldElbowCenter = Transform(Transform(elbowCenter.center, viewProjectionMatrix), viewportMatrix);
+		Vector3 worldHandCenter = Transform(Transform(handCenter.center, viewProjectionMatrix), viewportMatrix);
 
 		ImGui::Begin("Window");
 
-		ImGui::DragFloat3("controlPoints[0].x", &controlPoints[0].x, 0.01f);
-		ImGui::DragFloat3("controlPoints[1].x", &controlPoints[1].x, 0.01f);
-		ImGui::DragFloat3("controlPoints[2].x", &controlPoints[2].x, 0.01f);
+		ImGui::DragFloat3("translates[0]", &translates[0].x, 0.01f);
+		ImGui::DragFloat3("rotates[0].x", &rotates[0].x, 0.01f);
+		ImGui::DragFloat3("scales[0].x", &scales[0].x, 0.01f);
+		ImGui::DragFloat3("translates[1]", &translates[1].x, 0.01f);
+		ImGui::DragFloat3("rotates[1].x", &rotates[1].x, 0.01f);
+		ImGui::DragFloat3("scales[1].x", &scales[1].x, 0.01f);
+		ImGui::DragFloat3("translates[2]", &translates[2].x, 0.01f);
+		ImGui::DragFloat3("rotates[2].x", &rotates[2].x, 0.01f);
+		ImGui::DragFloat3("scales[2].x", &scales[2].x, 0.01f);
 
 		// カメラ
 		ImGui::DragFloat3("cameraTranslate", &cameraTranslate.x, 0.01f);
@@ -782,10 +828,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 
 		DrawGrid(viewProjectionMatrix, viewportMatrix);
-		DrawSphere(controlPointsSphere0, viewProjectionMatrix, viewportMatrix, BLACK);
-		DrawSphere(controlPointsSphere1, viewProjectionMatrix, viewportMatrix, BLACK);
-		DrawSphere(controlPointsSphere2, viewProjectionMatrix, viewportMatrix, BLACK);
-		DrawBezier(controlPoints[0], controlPoints[1], controlPoints[2], viewProjectionMatrix, viewportMatrix, BLUE);
+
+		//
+		DrawSphere(shoulderCenter, viewProjectionMatrix, viewportMatrix, RED);
+		DrawSphere(elbowCenter, viewProjectionMatrix, viewportMatrix, GREEN);
+		DrawSphere(handCenter, viewProjectionMatrix, viewportMatrix, BLUE);
+		
+		Novice::DrawLine(int(worldShoulderCenter.x), int(worldShoulderCenter.y), int(worldElbowCenter.x), int(worldElbowCenter.y), WHITE);
+		Novice::DrawLine(int(worldElbowCenter.x), int(worldElbowCenter.y), int(worldHandCenter.x), int(worldHandCenter.y), WHITE);
 
 		///
 		/// ↑描画処理ここまで
